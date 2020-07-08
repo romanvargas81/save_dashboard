@@ -23,8 +23,7 @@ class SavePosition(MethodView):
     def post(self):
         form = QuickBooksForm(request.form)
         period = form.period.data
-        print('26:',datetime.now())
-        as_of_date = datetime.now()
+        as_of_date = datetime.utcnow()
         submitter = current_user.identifier
         if form.wisetack_junior_position.data is None :
             wisetack_junior_position = 0.00   
