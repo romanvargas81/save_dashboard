@@ -12,3 +12,4 @@ faker==4.1.1
 pytest-httpserver==0.3.4
 psycopg2==2.8.5
 flask-sqlalchemy==2.4.3
+wtforms==2.3.1
