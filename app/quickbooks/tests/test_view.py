@@ -27,6 +27,7 @@ def test_save_position_202(mocker: MagicMock, client: FlaskClient, app):
     with app.app_context():
         url = url_for('quickbooks.save_position')
     response = client.post(url)
+    db = current_app.extensions['sqlalchemy'].db
     assert response.status_code == 202
     decode_token.assert_called_once()
    
