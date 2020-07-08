@@ -36,6 +36,7 @@ class SavePosition(MethodView):
             lighter_junior_position = form.lighter_junior_position.data
         position = QuickbooksPosition(submitter,as_of_date,period,wisetack_junior_position,lighter_junior_position)
         try:
+            db.create_all()
             db.session.add(position)
             db.session.commit()
         except Exception:
