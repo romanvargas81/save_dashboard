@@ -31,7 +31,7 @@ class SavePosition(MethodView):
             return render_template(
                 'quickbooks/error-page.html',
                 status=201
-            ),status=404
+            )
         else:
             wisetack_junior_position = form.wisetack_junior_position.data
         if form.lighter_junior_position.data is None:
