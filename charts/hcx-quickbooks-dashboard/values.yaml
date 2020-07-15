@@ -1,24 +1,26 @@
-# Default values for quickbooks_positions.
+# Default values for hcx-quickbooks-dashboard.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
 
-image:
-  repository: nginx
-  tag: stable
-  pullPolicy: IfNotPresent
+secret_name: "hcx-quickbooks-dashboard"
+
+nginx:
+  image:
+    repository: 480300221267.dkr.ecr.us-east-1.amazonaws.com/hcx-quickbooks-dashboard-nginx
+    tag: "NOT_SET"
+    imagepullPolicy: IfNotPresent
+
+flask:
+  image:
+    repository: 480300221267.dkr.ecr.us-east-1.amazonaws.com/hcx-quickbooks-dashboard-flask
+    tag: "NOT_SET"
+    imagepullPolicy: IfNotPresent
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
-
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name:
 
 podSecurityContext: {}
   # fsGroup: 2000
@@ -67,9 +69,6 @@ tolerations: []
 
 affinity: {}
 
-db: 
-  host_name: 'DB_URI'
-  port: 5432
-  username: username_db
-  password: password
-  schema: ns_sync
+local_dev:
+  enabled: false
+  db_uri: ""

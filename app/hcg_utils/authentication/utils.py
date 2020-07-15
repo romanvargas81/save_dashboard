@@ -5,7 +5,6 @@ from flask import (
 from .jwt import decode_token
 from .user import User
 
-
 current_user = LocalProxy(lambda: _get_user())
 
 
@@ -38,5 +37,4 @@ def __load_user():
 def _get_user():
     if has_request_context() and not hasattr(_request_ctx_stack.top, 'user'):
         _request_ctx_stack.top.user = __load_user()
-
     return getattr(_request_ctx_stack.top, 'user', None)

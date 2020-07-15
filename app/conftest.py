@@ -46,3 +46,5 @@ def app_config(DB_URI):
 @pytest.fixture(scope="session")
 def DB_URI():
     return os.environ['DB_URI']
+
+    

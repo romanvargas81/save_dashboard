@@ -20,7 +20,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-      serviceAccountName: {{ template "hcx-quickbooks-dashboard.serviceAccountName" . }}
+      automountServiceAccountToken: false
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -28,37 +28,55 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.flask.image.repository }}:{{ .Values.flask.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.flask.image.pullPolicy }}
           volumeMounts:
             - name: uwsgi
               mountPath: /var/run/uwsgi
-
           env:
-            - name: HOST_URL
-              value: "{{ .Values.db.host_url }}"
-            - name: USERNAME
-              value: "{{ .Values.db.username_db }}"  
-            - name: PORT
-              value: "{{ .Values.db.port }}"  
-            - name: PASSWORD 
-              value: "{{ .Values.db.password }}"
-            - name: SCHEMA 
-              value: "{{ .Values.db.schema }}"
-
+{{- if .Values.local_dev.enabled }}
+            - name: wait-for-postgres
+              image: postgres:10-alpine
+              command:
+                - 'sh'
+                - '-c'
+                - 'until pg_isready --dbname ${DB_URI}; do echo waiting for postgres; sleep 2; done;'
+            - name: DB_URI
+              value: "postgres://{{ .Release.Name }}-database.default.svc.cluster.local/ns_sync?user=postgres&password=password"
+            - name: HCG_UTILS_AUTHENTICATION_JWT_VERIFY
+              value: "no"
+{{- else }}
+            - name: DB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secret_name }}
+                  key: DB_URI
+{{- end }} 
+          resources:
+      {{- toYaml .Values.resources | nindent 12 }}
+        - name: nginx
+          image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}"
+          imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+          volumeMounts:
+            - name: uwsgi
+              mountPath: /var/run/uwsgi
+{{- if .Values.local_dev }}
+          env:
+            - name: DB_URI
+              value: "postgres://{{ .Release.Name }}-database.default.svc.cluster.local/ns_sync?user=postgres&password=password"
+{{- end }}
           ports:
-            - name: http
-              containerPort: 80
-              protocol: TCP
+            - containerPort: 80
+              name: http
           livenessProbe:
             httpGet:
               path: /
               port: http
+            initialDelaySeconds: 360
           readinessProbe:
             httpGet:
               path: /
               port: http
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            initialDelaySeconds: 360
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -71,3 +89,6 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+      volumes:
+        - name: uwsgi
+          emptyDir: {}

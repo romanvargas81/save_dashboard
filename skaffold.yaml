@@ -19,8 +19,9 @@ deploy:
         flask.image: hcx-quickbooks-dashboard-flask
         nginx.image: hcx-quickbooks-dashboard-nginx
       setValues:
-        local_dev: true
-        flask.test_room: "dummy"
+        local_dev.enabled: true
+      setValueTemplates:
+          local_dev.db_uri: "{{.DB_URI}}"
       imageStrategy:
         helm: {}
 
