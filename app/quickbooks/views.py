@@ -10,7 +10,7 @@ from models.quickbooks_position import QuickbooksPosition
 from models.quickbooks_form import QuickBooksForm
 from services.db import DB as db
 from hcg_utils.authentication.utils import current_user
-from flask_api import status
+
 
 QUIKBOOKS = Blueprint('quickbooks',__name__, template_folder='templates')
 
@@ -27,18 +27,17 @@ class SavePosition(MethodView):
         as_of_date = datetime.utcnow()
         submitter = current_user.identifier
         if form.wisetack_junior_position.data is None :
-            raise ValueError('Please enter a value for Wisetack Junior position')
             return render_template(
                 'quickbooks/error-page.html',
-                status=201
+                exception = 'Please enter a value for Wisetack Junior position'
             )
         else:
             wisetack_junior_position = form.wisetack_junior_position.data
         if form.lighter_junior_position.data is None:
-            raise ValueError('Please enter a value for Lighter Junior position')
             return render_template(
-                'quickbooks/error-page.html'
-            ), status.HTTP_400_BAD_REQUEST
+                'quickbooks/error-page.html',
+                exception = 'Please enter a value for Lighter Junior position'
+            )
         else:
             lighter_junior_position = form.lighter_junior_position.data
         position = QuickbooksPosition(submitter,as_of_date,period,wisetack_junior_position,lighter_junior_position)
@@ -47,10 +46,9 @@ class SavePosition(MethodView):
             db.session.commit()
         except Exception:
             current_app.logger.exception('Please verify your data')
-            error = 'Please verify your data'
             return render_template(
                 'quickbooks/error-page.html',
-                exception = error
+                exception = 'Please verify your data'
             )
         return render_template(
             'quickbooks/success-page.html'

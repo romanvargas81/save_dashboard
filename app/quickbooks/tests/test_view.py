@@ -9,6 +9,7 @@ from models.quickbooks_position import QuickbooksPosition
 from quickbooks.views import SavePosition
 
 def test_save_quickbook_position_200(client: FlaskClient, app):
+    
     position = SavePosition()
     data = {
         "submitter" : "dummy",
@@ -23,6 +24,7 @@ def test_save_quickbook_position_200(client: FlaskClient, app):
     assert response.status_code == 200
     assert "testing.domain/save_position" in url
 
+
 def test_no_wisetack_junior_(client: FlaskClient, app):
     data = {
         "submitter" : "dummy",
@@ -32,9 +34,11 @@ def test_no_wisetack_junior_(client: FlaskClient, app):
     }  
     with app.app_context():
         url = url_for('quickbooks.save_position')
-    with pytest.raises(ValueError, match="Please enter a value for Wisetack Junior position"):    
-        response = client.post(url,data=data)
-        assert response.status_code == 200
+        template = render_template('quickbooks/success-page.html')
+   
+    response = client.post(url,data=data)
+    assert response.status_code == 200
+    assert response.data.decode() != template
 
 def test_no_lighter_junior_position(client: FlaskClient, app):
     data = {
@@ -45,9 +49,11 @@ def test_no_lighter_junior_position(client: FlaskClient, app):
     }  
     with app.app_context():
         url = url_for('quickbooks.save_position')
-    with pytest.raises(ValueError, match="Please enter a value for Lighter Junior position"):    
-        response = client.post(url,data=data)
-        assert response.status_code == 200
+        template = render_template('quickbooks/success-page.html')
+ 
+    response = client.post(url,data=data)
+    assert response.status_code == 200
+    assert response.data.decode() != template
 
 
 def test_request_task_status_200(client: FlaskClient, app):
