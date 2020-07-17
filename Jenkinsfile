@@ -5,7 +5,7 @@ node('docker-builder') {
     }
 
     stage('Build flask') {
-        buildDockerfile "hcx-quickbooks-dashboard-flask", "Dockerfile"
+        dockerImage = buildDockerfile "hcx-quickbooks-dashboard-flask", "Dockerfile"
     }
 
     stage('Build nginx'){
@@ -14,14 +14,17 @@ node('docker-builder') {
 
     stage('Run tests'){
         withPostgresServer {
-            docker.image("hcx-quickbooks-dashboard-flask").inside {
-                withEnv(['HCG_UTILS_AUTHENTICATION_JWT_VERIFY=no']){
+            dockerImage.inside {
                     sh 'alembic upgrade head'
-                    sh 'pytest --junitxml=xunit-reports/xunit-result-python.xml --cov --cov-report xml:coverage-reports/coverage-python.xml'
+                    sh 'alembic downgrade base'
+                    sh 'alembic upgrade head'
                 }
-            }
+            withEnv(['HCG_UTILS_AUTHENTICATION_JWT_VERIFY=no']){
+               pytest(dockerImage)
+            }      
         }
     }
+    
 
     stage('SonarQube analysis') {
         sonarScan 'hcx-quickbooks-dashboard'
@@ -35,10 +38,10 @@ node('docker-builder') {
     }
 
     inMaster {
-	stage('Migrate') {
-	    def alembic = docker.image('hcx-quickbooks-dashboard-flask')
-	    applyAlembicMigration('hcx-quickbooks-dashboard', alembic)
-	}
+        stage('Migrate') {
+            def alembic = dockerImage
+            applyAlembicMigration(dockerImage,alembic)
+        }
     }
 }
 

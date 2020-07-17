@@ -1,17 +1,27 @@
 {% extends 'quickbooks/base.html' %} 
+
+{% macro errors(element) %}
+    {% if element.errors %}
+    {% for error in element.errors %}
+    Error: {{ error }}
+    {% endfor %}
+    {% endif %}
+{% endmacro %}
+
 {% block body %}
-<form action="{{ url_for('quickbooks.save_position' )}}" method="POST">
+<h2>MCP Quickbooks Entry</h2>
+<form action="{{ url_for('quickbooks.data_entry' )}}" method="POST">
     <br>
-        <label for="filter">Enter position</label>
-    <br>
-    <br>
-        Period: <input id="period" name="period" type="date"  required/> 
-    <br>
-    <br>
-        Wisetack Member Junior Position: <input id="wisetack_junior_position" name="wisetack_junior_position" type="number" placeholder="0.00" step="0.01" width="150" max="999999999999.99" required/>
+    {{form.period.label}} {{form.period()}}
+    {{ errors(form.period) }}
     <br>
     <br>
-        Lighter Member Junior Position: <input id="lighter_junior_position" name="lighter_junior_position" type="number" placeholder="0.00" step="0.01" width="150" max="999999999999.99" required/>
+    {{form.wisetack_junior_position.label}} {{form.wisetack_junior_position()}}
+    {{ errors(form.wisetack_junior_position) }}
+    <br>
+    <br>
+    {{form.lighter_junior_position.label}} {{form.lighter_junior_position()}}
+    {{ errors(form.lighter_junior_position) }}
     <br>
     <br>
     <input type="submit" value="save" />

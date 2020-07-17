@@ -9,7 +9,7 @@ from werkzeug.datastructures import Headers
 from flask import current_app
 
 from app import app as base_app
-from quickbooks.views import QUIKBOOKS
+from quickbooks.views import QUICKBOOKS
 
 faker = Faker()
 
@@ -39,7 +39,7 @@ def app_config(DB_URI):
         "HASHING_KEY": str.encode(faker.name()),
         "TESTING": True,
         "WTF_CSRF_ENABLED": False,
-        "SERVER_NAME": "testing.domain",
+        "SERVER_NAME": "localhost",
         "DB_URI": DB_URI  
     }
 

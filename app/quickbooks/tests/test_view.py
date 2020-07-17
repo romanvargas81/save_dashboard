@@ -7,12 +7,11 @@ from flask.testing import FlaskClient
 from flask import url_for, Response, current_app, redirect, render_template, Flask
 from models.quickbooks_position import QuickbooksPosition
 from quickbooks.views import SavePosition
-
+ 
 def test_save_quickbook_position_200(client: FlaskClient, app):
-    
-    position = SavePosition()
+    position = QuickbooksPosition('dummy','02-02-2020','02-02-2020',12,10)
+    mock_headers = {'x-hcx-auth-jwt-assertion': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJpc3MiOiJIQ1gtSUFQIiwiY29tLmhjZ2Z1bmRzLmhjeC91c2VyIjp7Imxhc3RfbmFtZSI6IlVzZXIiLCJmaXJzdF9uYW1lIjoiVGVzdCIsInJvbGVzIjpbWyJoZWFkZXItZWNobyIsImFjY2VzcyJdLFsiaGVhZGVyLWVjaG8iLCJ1cGRhdGUiXV0sImlkZW50aWZpZXIiOiJyb21hbkBleGFtcGxlLmNvbSJ9LCJpYXQiOjE1OTQxNDIwOTQsImNvbS5oY2dmdW5kcy5oY3gvYWN0aW9uIjoiYWNjZXNzIiwiYXVkIjoiaGVhZGVyLWVjaG8iLCJleHAiOjQwNzA5MDg4MDAsIm5iZiI6MTU5NDE0MjA5NCwic3ViIjoicm9tYW5AZXhhbXBsZS5jb20ifQ.' }
     data = {
-        "submitter" : "dummy",
         "as_of_date": datetime.utcnow(),
         "period" : "2020-07-11",
         "wisetack_junior_position" : 12.12,
@@ -20,9 +19,9 @@ def test_save_quickbook_position_200(client: FlaskClient, app):
     }  
     with app.app_context():
         url = url_for('quickbooks.save_position')
-    response = client.post(url,data=data)
-    assert response.status_code == 200
-    assert "testing.domain/save_position" in url
+        response = client.post(url,data=data,headers=mock_headers)
+        assert response.status_code == 200
+        assert "localhost/save_position" in url
 
 
 def test_no_wisetack_junior_(client: FlaskClient, app):
@@ -35,9 +34,8 @@ def test_no_wisetack_junior_(client: FlaskClient, app):
     with app.app_context():
         url = url_for('quickbooks.save_position')
         template = render_template('quickbooks/success-page.html')
-   
     response = client.post(url,data=data)
-    assert response.status_code == 200
+    assert response.status_code == 400
     assert response.data.decode() != template
 
 def test_no_lighter_junior_position(client: FlaskClient, app):
@@ -50,23 +48,14 @@ def test_no_lighter_junior_position(client: FlaskClient, app):
     with app.app_context():
         url = url_for('quickbooks.save_position')
         template = render_template('quickbooks/success-page.html')
- 
     response = client.post(url,data=data)
-    assert response.status_code == 200
+    assert response.status_code == 400
     assert response.data.decode() != template
 
-
-def test_request_task_status_200(client: FlaskClient, app):
+def test_get_form_quickbook_status_200(client: FlaskClient, app):
     with app.app_context():
         url = url_for('quickbooks.form_quickbook')
     response = client.get(url)
     assert response.status_code == 200
 
 
-def test_mock_save_position_200(mocker: MagicMock, client: FlaskClient, app):
-    decode_token = mocker.patch("quickbooks.views.SavePosition.post", return_value={})
-    with app.app_context():
-        url = url_for('quickbooks.save_position', form={})
-    response = client.post(url)
-    assert response.status_code == 200
-    decode_token.assert_called_once()

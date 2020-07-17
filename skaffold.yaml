@@ -20,13 +20,5 @@ deploy:
         nginx.image: hcx-quickbooks-dashboard-nginx
       setValues:
         local_dev.enabled: true
-      setValueTemplates:
-          local_dev.db_uri: "{{.DB_URI}}"
       imageStrategy:
         helm: {}
-
-portForward:
-  - resourceType: service
-    resourceName: hcx-quickbooks-dashboard
-    port: 80
-    localPort: 4503

@@ -71,4 +71,3 @@ affinity: {}
 
 local_dev:
   enabled: false
-  db_uri: ""

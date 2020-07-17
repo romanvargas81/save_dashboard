@@ -52,12 +52,12 @@ spec:
         - 'until pg_isready --dbname ${DB_URI}; do echo waiting for postgres; sleep 2; done;'
       env:
         - name: DB_URI
-          value: "postgres://{{ .Release.Name }}-database.default.svc.cluster.local/ns_sync?user=postgres&password=password"
+          value: {{ include "hcx-quickbooks-dashboard.local_dev.db_uri" . }}
   containers:
     - name: alembic
       image: "{{ .Values.flask.image.repository }}:{{ .Values.flask.image.tag }}"
       command: ['alembic', 'upgrade', 'head']
       env:
         - name: DB_URI
-          value: "postgres://{{ .Release.Name }}-database.default.svc.cluster.local/ns_sync?user=postgres&password=password"
+          value: {{ include "hcx-quickbooks-dashboard.local_dev.db_uri" . }}
 {{- end }}

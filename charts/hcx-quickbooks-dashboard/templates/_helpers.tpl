@@ -44,7 +44,6 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
-{{/*
-Create the name of the service account to use
-*/}}
-
+{{- define "hcx-quickbooks-dashboard.local_dev.db_uri" -}}
+postgres://{{ .Release.Name }}-database.{{ .Release.Namespace }}.svc.cluster.local/ns_sync?user=postgres&password=password
+{{- end -}}

@@ -41,7 +41,7 @@ spec:
                 - '-c'
                 - 'until pg_isready --dbname ${DB_URI}; do echo waiting for postgres; sleep 2; done;'
             - name: DB_URI
-              value: "postgres://{{ .Release.Name }}-database.default.svc.cluster.local/ns_sync?user=postgres&password=password"
+              value: {{ include "hcx-quickbooks-dashboard.local_dev.db_uri" . }}
             - name: HCG_UTILS_AUTHENTICATION_JWT_VERIFY
               value: "no"
 {{- else }}
@@ -59,24 +59,19 @@ spec:
           volumeMounts:
             - name: uwsgi
               mountPath: /var/run/uwsgi
-{{- if .Values.local_dev }}
-          env:
-            - name: DB_URI
-              value: "postgres://{{ .Release.Name }}-database.default.svc.cluster.local/ns_sync?user=postgres&password=password"
-{{- end }}
           ports:
             - containerPort: 80
               name: http
           livenessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: http
-            initialDelaySeconds: 360
+            initialDelaySeconds: 10
           readinessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: http
-            initialDelaySeconds: 360
+            initialDelaySeconds: 5
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
